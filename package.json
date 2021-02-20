@@ -1,0 +1,19 @@
+{
+  "name": "purple-axomo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scraper.js",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "puppeteer": "^7.1.0",
+    "xlsx": "^0.16.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scraper-start": "node scraper.js && open axomo-store-inventory.xlsx"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
