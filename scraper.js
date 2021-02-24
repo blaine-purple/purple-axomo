@@ -1,9 +1,11 @@
 require('dotenv').config();
+const notifier = require('node-notifier');
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const xlsx = require('xlsx');
 const { EMAIL, PASSWORD } = process.env;
-const productsList = [['Product Name', 'Price', 'Stock Levels', 'URL']];
+var productsList = [['Product Name', 'Price', 'Stock Levels', 'URL']];
+var productListObj = [];
 
 const path = './axomo-store-inventory.xlsx';
 
@@ -16,7 +18,7 @@ async function removeFiles(path) {
     });
 }
 
-removeFiles(path);
+// removeFiles(path);
 
 async function scrapeProduct(url) {
     if (url) {
@@ -43,7 +45,9 @@ async function scrapeProduct(url) {
         const stockLevel = await stockLevelHtml.jsonValue();
     
         let productLine = [parsedTitle, price, stockLevel, fullUrl];
+        let productLineObj = {parsedTitle, price, stockLevel, fullUrl};
         productsList.push(productLine);
+        productListObj.push(productLineObj)
         browser.close();
     }
 }
@@ -76,6 +80,22 @@ function createExcelBoook(products) {
     const sheet = xlsx.utils.aoa_to_sheet(products);
     xlsx.utils.book_append_sheet(book, sheet);
     xlsx.writeFile(book, 'axomo-store-inventory.xlsx');
+}
+
+function logProducts(products) {
+    console.table(products)
+    for (let i in productsList) {
+        if(productsList[i][2] !== 'Out of Stock'){
+            notifier.notify({
+                title: `${productsList[i][0]} in stock!!!`,
+                message: `${productsList[i][2]}`
+              });
+        }
+    }
+};
+function resetLists() {
+    productsList = [['Product Name', 'Price', 'Stock Levels', 'URL']];
+    productListObj = [];
 }
 
 let productUrls = [
@@ -286,7 +306,18 @@ async function loopingThroughProducts(urls) {
     for (let i = 0; i < urls.length; i++) {
         await scrapeProduct(urls[i]);
     }
-    await createExcelBoook(productsList);
+    // await createExcelBoook(productsList);
+    await logProducts(productListObj);
 }
 
-loopingThroughProducts(productUrls); 
+notifier.notify({
+    title: 'test notification',
+    message: 'your axomo store notifications are working'
+  });
+
+loopingThroughProducts(productUrls);
+setInterval(function() {
+    resetLists()
+    console.log("\n\n\n\n\n\n\n\n\n\n\n\nstarted...\n")
+    loopingThroughProducts(productUrls); 
+}, 60 * 1000 * 2);

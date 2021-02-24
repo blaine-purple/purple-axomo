@@ -5,6 +5,7 @@
   "main": "scraper.js",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "node-notifier": "^9.0.0",
     "puppeteer": "^7.1.0",
     "xlsx": "^0.16.9"
   },
